@@ -1,10 +1,11 @@
 //JavaScript Document by wondger[at]gmail[dot]com
 (function(){
+    var doc = document,
+        win = window;
     var S = function(selector,context){
         //return SO(SL Object)
         return new SL(selector,context);
     };
-    var doc = document,win = window;
     var SL = function(selector,context){
         this.eles = SL.fn.query(selector,context);
         this.length = this.eles.length;
@@ -43,6 +44,15 @@
                 SL.fn.replaceClass(this.get(0),oldCls,newCls);
             });
             return this;
+        },
+        toggleClass:function(cls){
+            var reCls = new RegExp('^\\s|\\b'+cls+'\\b|\\s$','g');
+            this.each(function(){
+                var ele = this.get(0);
+                if(reCls.test(ele.className)) SL.fn.replaceClass(ele,cls,'');
+                else SL.fn.addClass(ele,cls);
+            });
+            return this;
         }
     };
     /*
@@ -50,8 +60,13 @@
      * @static
      * @description 提供基本功能函数
      * @Object
-     * @note 对象成员方法不要使用this，避免外部调用使用apply、call该写this
+     * @note 对象成员方法不要使用this，避免外部调用使用apply、call改写this
      * @note 切勿添加不必要的功能函数，该处的函数设计的初衷都是为原型方法调用，能在原型方法中实现尽量在原型方法中实现
+     * @note 添加功能函数原则：
+     *          1.可能在不同的原型方法中多次调用，如：replaceClass
+     *          2.实现复杂，分离到功能函数便于维护，如：query
+     *          3.功能函数需要使用到S构造器，如：each,addEvent
+     *          4.可能在其他功能函数中调用
      */
     SL.fn = {
         /*
@@ -113,27 +128,20 @@
                 SL.fn.addEvent = function(ele,evt,fn,index){
                     ele.addEventListener(evt,function(){fn.call(S(ele),index)},false);
                 };
-                return;
             }else if(ele.attachEvent){
                 ele.attachEvent('on'+evt,function(){fn.call(S(ele),index)},false);
                 SL.fn.addEvent = function(ele,evt,fn,index){
                     ele.attachEvent(evt,function(){fn.call(S(ele),index)},false);
                 };
-                return;
             }
         },
         addClass:function(ele,cls){
             if(ele.className.indexOf(cls)>=0) return;
             else ele.className += (ele.className ? ' '+cls : cls);
-            return;
         },
         replaceClass:function(ele,oldCls,newCls){
             var reCls = new RegExp('^\\s|\\b'+oldCls+'\\b|\\s$','g');
             ele.className = ele.className.replace(reCls,newCls);
-            return;
-        },
-        toggleClass:function(ele,cls){
-            return;
         }
     }
     window.S = window.SL = S;
