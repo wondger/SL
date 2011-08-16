@@ -1,7 +1,7 @@
 /*
  * @public
  * @static
- * @description some util methons.this Object should be inserted into nonamed function in SL.core.js
+ * @description some util methons. its items should be add as SL's static public method
  * @Object
  */
 SL.util = {
