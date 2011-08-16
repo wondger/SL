@@ -131,7 +131,7 @@
             }else if(ele.attachEvent){
                 ele.attachEvent('on'+evt,function(){fn.call(S(ele),index)},false);
                 SL.fn.addEvent = function(ele,evt,fn,index){
-                    ele.attachEvent(evt,function(){fn.call(S(ele),index)},false);
+                    ele.attachEvent('on'+evt,function(){fn.call(S(ele),index)},false);
                 };
             }
         },
