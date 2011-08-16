@@ -1,3 +1,9 @@
+/*
+ * @public
+ * @static
+ * @description some util methons.this Object should be inserted into nonamed function in SL.core.js
+ * @Object
+ */
 SL.util = {
     /*
      * @name templateParse
