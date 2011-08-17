@@ -46,10 +46,9 @@
             return this;
         },
         toggleClass:function(cls){
-            var reCls = new RegExp('^\\s|\\b'+cls+'\\b|\\s$','g');
             this.each(function(){
                 var ele = this.get(0);
-                if(reCls.test(ele.className)) SL.fn.replaceClass(ele,cls,'');
+                if(ele.className.indexOf(cls)>=0) SL.fn.replaceClass(ele,cls,'');
                 else SL.fn.addClass(ele,cls);
             });
             return this;
@@ -137,10 +136,10 @@
         },
         addClass:function(ele,cls){
             if(ele.className.indexOf(cls)>=0) return;
-            else ele.className += (ele.className ? ' '+cls : cls);
+            else ele.className += (ele.className && /\s$/.test(ele.className) ? cls : ' '+cls);
         },
         replaceClass:function(ele,oldCls,newCls){
-            var reCls = new RegExp('^\\s|\\b'+oldCls+'\\b|\\s$','g');
+            var reCls = new RegExp('^|\\b'+oldCls+'\\b|$','g');
             ele.className = ele.className.replace(reCls,newCls);
         }
     }
