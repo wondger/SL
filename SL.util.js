@@ -20,4 +20,5 @@ SL.util = {
             return r.constructor == String || r.constructor == Number ? r : '{{'+b+'}}';
         });
     }
-}
+};
+S.mix(S,SL.util);

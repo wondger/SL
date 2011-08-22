@@ -52,10 +52,20 @@
                 else SL.fn.addClass(ele,cls);
             });
             return this;
-        }
+        },
+        show:function(){
+            return this;
+        },
+        hide:function(){
+            this.each(function(){
+                this.get(0).style.display = 'none';
+            });
+            return this;
+        },
+        
     };
     /*
-     * @private{should}
+     * @private
      * @static
      * @description 提供基本功能函数
      * @Object
@@ -142,6 +152,36 @@
             var reCls = new RegExp('^|\\b'+oldCls+'\\b|$','g');
             ele.className = ele.className.replace(reCls,newCls);
         }
-    }
+    };
+    SL.mix = function(r,s){
+        if(!r||!s) return;
+        for(var i in s){
+            r[i] = s[i];
+        }
+    };
+    /*
+     * @description SL.fn.prototype中创建的方法用于copy到S中用作开放的静态方法
+     *  原型对象在此处无其他意义，仅作方法存储空间
+     * @note 是否存在性能问题
+     */
+    SL.fn.prototype = {
+        type:function(obj){
+            if(typeof obj == 'string') return 'string';
+            if(typeof obj == 'boolean') return 'boolean';
+            if(typeof obj == 'function') return 'function';
+            if(typeof obj == 'number') return 'number';
+            if(typeof obj.constructor == Array) return 'array';
+            switch(obj){
+                case null:
+                    return 'null';
+                case undefined:
+                    return 'undefined';
+                default:
+                    return obj;
+            }
+        },
+        mix:SL.mix
+    };
+    SL.mix(S,SL.fn.prototype);
     window.S = window.SL = S;
 })();
