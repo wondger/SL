@@ -19,7 +19,7 @@
      * @note 参数类型多元化，如：attr()、data()、css()
      */
     SL.prototype = {
-        constructor:SL,
+        constructor:'SO',
         /*
          * @description get DOMElement by index
          */
@@ -79,7 +79,7 @@
         },
         data:function(name,value){
             return this;
-        };
+        },
         css:function(name,value){
             return this;
         },
@@ -256,22 +256,20 @@
     SL.lang = {
         mix:SL.core.mix,
         type:function(obj){
+            /*
+             * @note 注意判断先后顺序
+             */
+            if(obj === null) return 'null';
+            if(obj === undefined) return 'undefined';
+            if(obj.constructor == 'SO') return 'SO';
             if(typeof obj == 'string') return 'string';
             if(typeof obj == 'boolean') return 'boolean';
             if(typeof obj == 'function') return 'function';
+            if(obj.constructor == Array) return 'array';
+            if(obj.constructor == Object) return 'object';
             // typeof NaN Number
             if(isNaN(obj)) return 'NaN';
             if(typeof obj == 'number') return 'number';
-            if(obj.constructor == Array) return 'array';
-            if(obj.constructor == Object) return 'object';
-            switch(obj){
-                case null:
-                    return 'null';
-                case undefined:
-                    return 'undefined';
-                default:
-                    return obj;
-            }
         },
         isString:function(obj){
             return SL.lang.type(obj) === 'string';
@@ -299,6 +297,9 @@
         },
         isNaN:function(obj){
             return SL.lang.type(obj) === 'NaN';
+        },
+        isSO:function(obj){
+            return SL.lang.type(obj) === 'SO';
         }
     };
     SL.core.mix(S,SL.lang);
