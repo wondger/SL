@@ -204,7 +204,7 @@
             if(typeof obj == 'boolean') return 'boolean';
             if(typeof obj == 'function') return 'function';
             if(typeof obj == 'number') return 'number';
-            if(isNaN(obj)) return 'number';
+            if(isNaN(obj)) return 'NaN';
             if(obj.constructor == Array) return 'array';
             if(obj.constructor == Object) return 'object';
             switch(obj){
