@@ -12,17 +12,31 @@
         SL.fn.add(this,this.eles,0);
     };
     /*
-     * @note:原型方法尽量只进行对基本功能函数的简单调用
+     * @note 原型方法尽量只进行对基本功能函数的简单调用
      *       逻辑处理皆放在基本功能函数中实现
      *       原型方法尽可能返回this供链式调用
+     * @note 无参方法可传递索引以对选择列表进行过滤，如：show()、hide()、toggle()
+     * @note 参数类型多元化，如：attr()、data()、css()
      */
     SL.prototype = {
+        /*
+         * @description get DOMElement by index
+         */
         get:function(i){
             return this.eles[i];
+        },
+        /*
+         * @description get SO by index
+         */
+        item:function(i){
+            return S(this.get(i));
         },
         size:function(){
             return this.length; 
         },
+        /*
+         * @note 默认将当前元素封装为SO作为第一个参数传递
+         */
         each:function(fn){
             SL.fn.each(this.eles,fn);
             return this;
@@ -59,16 +73,59 @@
             });
             return this;
         },
-        show:function(){
+        attr:function(name,value){
             return this;
         },
-        hide:function(){
-            this.each(function(){
-                this.get(0).style.display = 'none';
-            });
+        data:function(name,value){
+            return this;
+        };
+        css:function(name,value){
             return this;
         },
-        
+        /*
+         * @note 此处应该判断元素类型，原生不具有value属性的元素，不能调用val()方法
+         * @note select的value值如何返回
+         */
+        val:function(name,value){
+            if(S.isUndefined(value)){
+                return this.get(0).value;
+            }else{
+
+                return this;
+            }
+        },
+        /*
+         * @description 显示元素
+         * @param i Number 元素索引
+         * @note 如何为不同类型元素设置不同的display
+         */
+        show:function(i){
+            if(S.isNumber(i)){
+                this.get(i).style.display = 'block';
+            }else{
+                this.each(function(){
+                    this.get(0).style.display = 'block';
+                });
+            }
+            return this;
+        },
+        /*
+         * @description 隐藏元素
+         * @param i Number 元素索引
+         */
+        hide:function(i){
+            if(S.isNumber(i)){
+                this.get(i).style.display = 'none';
+            }else{
+                this.each(function(){
+                    this.get(0).style.display = 'none';
+                });
+            }
+            return this;
+        },
+        toggle:function(i){
+
+        }
     };
     /*
      * @private
@@ -140,8 +197,6 @@
                 var i = 0;
                 while(eles[i]){
                     //set current element as this,and the index as the first default param
-                    //note:是否需要将this指向一个SO对象，还是仅指向ele
-                    //     指向SO对象后，定义原型方法时都需要使用get(0)
                     fn.call(S(eles[i]),i);
                     ++i;
                 }
@@ -183,8 +238,8 @@
      */
     SL.core = {
         /*
-         * @note: 会覆盖掉同名属性/方法
-         * @note: 与SL.fn.add方法有点重复，考虑优化
+         * @note 会覆盖掉同名属性/方法
+         * @note 与SL.fn.add方法有点重复，考虑优化
          */
         mix:function(r,s){
             if(!r||!s) return;
