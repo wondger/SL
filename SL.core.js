@@ -10,6 +10,10 @@
         this.eles = SL.fn.query(selector,context);
         this.length = this.eles.length;
     };
+    /*
+     * 原型方法尽量只进行对基本功能函数的简单调用
+     * 逻辑处理皆放在基本功能行数中实现
+     */
     SL.prototype = {
         get:function(i){
             return this.eles[i];
@@ -111,12 +115,15 @@
                 default:
                     return doc.getElementsByTagName(selector);
             }
+            return eles;
         },
         each:function(eles,fn){
-            if(fn.constructor == Function){
+            if(eles && fn.constructor == Function){
                 var i = 0;
                 while(eles[i]){
                     //set current element as this,and the index as the first default param
+                    //note:是否需要将this指向一个SL对象，还是仅指向ele
+                    //     指向SL对象后，定义原型方法时都需要使用get(0)
                     fn.call(S(eles[i]),i);
                     ++i;
                 }
