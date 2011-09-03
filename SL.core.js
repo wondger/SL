@@ -12,7 +12,7 @@
     };
     /*
      * 原型方法尽量只进行对基本功能函数的简单调用
-     * 逻辑处理皆放在基本功能行数中实现
+     * 逻辑处理皆放在基本功能函数中实现
      */
     SL.prototype = {
         get:function(i){
@@ -71,7 +71,7 @@
     /*
      * @private
      * @static
-     * @description 提供基本功能函数
+     * @description 提供不对外部开放的基本功能函数
      * @Object
      * @note 对象成员方法不要使用this，避免外部调用使用apply、call改写this
      * @note 切勿添加不必要的功能函数，该处的函数设计的初衷都是为原型方法调用，能在原型方法中实现尽量在原型方法中实现
@@ -161,7 +161,7 @@
         }
     };
     /*
-     * @description 核心功能函数，通常都是静态方法
+     * @description 核心的功能函数
      */
     SL.core = {
         mix:function(r,s){
@@ -172,10 +172,10 @@
         }
     };
     /*
-     * @description 通用静态方法，通过SL.core.mix拷贝到S对象
+     * @description 对外开放静态方法，通过SL.core.mix拷贝到S对象
      *              如类型判断type
      */
-    SL.core.lang = {
+    SL.lang = {
         type:function(obj){
             if(typeof obj == 'string') return 'string';
             if(typeof obj == 'boolean') return 'boolean';
@@ -193,6 +193,6 @@
         },
         mix:SL.core.mix
     };
-    SL.core.mix(S,SL.core.lang);
+    SL.core.mix(S,SL.lang);
     window.S = window.SL = S;
 })();
