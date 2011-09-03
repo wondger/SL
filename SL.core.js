@@ -122,8 +122,8 @@
                 var i = 0;
                 while(eles[i]){
                     //set current element as this,and the index as the first default param
-                    //note:是否需要将this指向一个SL对象，还是仅指向ele
-                    //     指向SL对象后，定义原型方法时都需要使用get(0)
+                    //note:是否需要将this指向一个SO对象，还是仅指向ele
+                    //     指向SO对象后，定义原型方法时都需要使用get(0)
                     fn.call(S(eles[i]),i);
                     ++i;
                 }
@@ -160,24 +160,28 @@
             ele.className = ele.className.replace(reCls,newCls);
         }
     };
-    SL.mix = function(r,s){
-        if(!r||!s) return;
-        for(var i in s){
-            r[i] = s[i];
+    /*
+     * @description 核心功能函数，通常都是静态方法
+     */
+    SL.core = {
+        mix:function(r,s){
+            if(!r||!s) return;
+            for(var i in s){
+                r[i] = s[i];
+            }
         }
     };
     /*
-     * @description SL.fn.prototype中创建的方法用于copy到S中用作开放的静态方法
-     *  原型对象在此处无其他意义，仅作方法存储空间
-     * @note 是否存在性能问题
+     * @description 通用静态方法，通过SL.core.mix拷贝到S对象
+     *              如类型判断type
      */
-    SL.fn.prototype = {
+    SL.core.lang = {
         type:function(obj){
             if(typeof obj == 'string') return 'string';
             if(typeof obj == 'boolean') return 'boolean';
             if(typeof obj == 'function') return 'function';
             if(typeof obj == 'number') return 'number';
-            if(typeof obj.constructor == Array) return 'array';
+            if(obj.constructor == Array) return 'array';
             switch(obj){
                 case null:
                     return 'null';
@@ -187,8 +191,8 @@
                     return obj;
             }
         },
-        mix:SL.mix
+        mix:SL.core.mix
     };
-    SL.mix(S,SL.fn.prototype);
+    SL.core.mix(S,SL.core.lang);
     window.S = window.SL = S;
 })();
