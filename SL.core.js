@@ -19,6 +19,7 @@
      * @note 参数类型多元化，如：attr()、data()、css()
      */
     SL.prototype = {
+        constructor:SL,
         /*
          * @description get DOMElement by index
          */
@@ -138,6 +139,7 @@
      *          1.可能在不同的原型方法中多次调用，如：replaceClass
      *          2.实现复杂，分离到功能函数便于维护，如：query
      *          3.可能在其他功能函数中调用
+     *          4.不包含对SO对象的操作
      */
     SL.fn = {
         /*
@@ -192,7 +194,7 @@
             return to;
         },
         each:function(eles,fn){
-            if(eles && fn.constructor == Function){
+            if(eles && S.isFunction(fn)){
                 var i = 0;
                 while(eles[i]){
                     //set current element as this,and the index as the first default param
