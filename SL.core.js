@@ -9,10 +9,12 @@
     var SL = function(selector,context){
         this.eles = SL.fn.query(selector,context);
         this.length = this.eles.length;
+        SL.fn.add(this,this.eles,0);
     };
     /*
-     * 原型方法尽量只进行对基本功能函数的简单调用
-     * 逻辑处理皆放在基本功能函数中实现
+     * @note:原型方法尽量只进行对基本功能函数的简单调用
+     *       逻辑处理皆放在基本功能函数中实现
+     *       原型方法尽可能返回this供链式调用
      */
     SL.prototype = {
         get:function(i){
@@ -117,6 +119,22 @@
             }
             return eles;
         },
+        /*
+         * @description 将from中的元素/属性追加到to(Object)中
+         */
+        add:function(to,from,start){
+            if(!S.isObject(to) || (!S.isObject(from)&&!S.isArray(from))) return;
+            var i = (S.isNumber(start) && start<to.length) ? start : (to.length ? 0 : to.length),
+                j = 0;
+            if(S.isObject(from)){
+                while(from[j]) to[i++] = from[j++];
+            }else if(S.isArray(from)){
+                for(var l=from.length;j<l;j++){
+                    to[i++] = from[j];
+                }
+            }
+            return to;
+        },
         each:function(eles,fn){
             if(eles && fn.constructor == Function){
                 var i = 0;
@@ -164,6 +182,10 @@
      * @description 核心的功能函数
      */
     SL.core = {
+        /*
+         * @note: 会覆盖掉同名属性/方法
+         * @note: 与SL.fn.add方法有点重复，考虑优化
+         */
         mix:function(r,s){
             if(!r||!s) return;
             for(var i in s){
@@ -176,22 +198,52 @@
      *              如类型判断type
      */
     SL.lang = {
+        mix:SL.core.mix,
         type:function(obj){
             if(typeof obj == 'string') return 'string';
             if(typeof obj == 'boolean') return 'boolean';
             if(typeof obj == 'function') return 'function';
             if(typeof obj == 'number') return 'number';
             if(obj.constructor == Array) return 'array';
+            if(obj.constructor == Object) return 'object';
             switch(obj){
                 case null:
                     return 'null';
                 case undefined:
                     return 'undefined';
+                case NaN:
+                    return 'NaN';
                 default:
                     return obj;
             }
         },
-        mix:SL.core.mix
+        isString:function(obj){
+            return SL.lang.type(obj) === 'string';
+        },
+        isBoolean:function(obj){
+            return SL.lang.type(obj) === 'boolean';
+        },
+        isFunction:function(obj){
+            return SL.lang.type(obj) === 'function';
+        },
+        isNumber:function(obj){
+            return SL.lang.type(obj) === 'number';
+        },
+        isArray:function(obj){
+            return SL.lang.type(obj) === 'array';
+        },
+        isObject:function(obj){
+            return SL.lang.type(obj) === 'object';
+        },
+        isNull:function(obj){
+            return SL.lang.type(obj) === 'null';
+        },
+        isUndefined:function(obj){
+            return SL.lang.type(obj) === 'undefined';
+        },
+        isNaN:function(obj){
+            return SL.lang.type(obj) === 'NaN';
+        }
     };
     SL.core.mix(S,SL.lang);
     window.S = window.SL = S;
