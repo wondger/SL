@@ -203,8 +203,9 @@
             if(typeof obj == 'string') return 'string';
             if(typeof obj == 'boolean') return 'boolean';
             if(typeof obj == 'function') return 'function';
-            if(typeof obj == 'number') return 'number';
+            // typeof NaN Number
             if(isNaN(obj)) return 'NaN';
+            if(typeof obj == 'number') return 'number';
             if(obj.constructor == Array) return 'array';
             if(obj.constructor == Object) return 'object';
             switch(obj){
