@@ -38,7 +38,7 @@ SL.util = {
     },
     delCookie:function(name,domain,path){
         SL.util.Cookie.del(name,domain,path);
-    }
+    },
     /*
      * @name templateParse
      * @description 将一个字符串中的特定格式的字符替换为一个对象中的特定值
