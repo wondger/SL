@@ -110,31 +110,21 @@
         },
         /*
          * @description 显示元素
-         * @param i Number 元素索引
          * @note 如何为不同类型元素设置不同的display
          */
-        show:function(i){
-            if(S.isNumber(i)){
-                this.get(i).style.display = 'block';
-            }else{
-                this.each(function(){
-                    this.get(0).style.display = 'block';
-                });
-            }
+        show:function(){
+            this.each(function(){
+                this.get(0).style.display = 'block';
+            });
             return this;
         },
         /*
          * @description 隐藏元素
-         * @param i Number 元素索引
          */
-        hide:function(i){
-            if(S.isNumber(i)){
-                this.get(i).style.display = 'none';
-            }else{
-                this.each(function(){
-                    this.get(0).style.display = 'none';
-                });
-            }
+        hide:function(){
+            this.each(function(){
+                this.get(0).style.display = 'none';
+            });
             return this;
         },
         toggle:function(i){
