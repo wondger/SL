@@ -7,9 +7,9 @@
         return new SL(selector,context);
     };
     var SL = function(selector,context){
-        this.eles = SL.fn.query(selector,context);
-        this.length = this.eles.length;
-        SL.fn.add(this,this.eles,0);
+        this.__eles__ = SL.fn.query(selector,context);
+        this.length = this.__eles__.length;
+        SL.fn.add(this,this.__eles__,0);
     };
     /*
      * @note 原型方法尽量只进行对基本功能函数的简单调用
@@ -19,12 +19,11 @@
      * @note 参数类型多元化，如：attr()、data()、css()
      */
     SL.prototype = {
-        constructor:'SO',
         /*
          * @description get DOMElement by index
          */
         get:function(i){
-            return this.eles[i];
+            return this.__eles__[i];
         },
         /*
          * @description get SO by index
@@ -33,13 +32,20 @@
             return S(this.get(i));
         },
         size:function(){
-            return this.length; 
+            return this.__eles__.length; 
+        },
+        add:function(selector,context){
+            var __eles__ = SL.fn.query(selector,context);
+            SL.fn.add(this.__eles__,__eles__);
+            SL.fn.add(this,__eles__);
+            this.length = this.size();
+            return this;
         },
         /*
          * @note 默认将当前元素封装为SO作为第一个参数传递
          */
         each:function(fn){
-            SL.fn.each(this.eles,fn);
+            SL.fn.each(this.__eles__,fn);
             return this;
         },
         on:function(evt,fn){
@@ -93,6 +99,13 @@
             }else{
 
                 return this;
+            }
+        },
+        html:function(value){
+            if(S.isUndefined(value)){
+                return this.get(0).innerHTML;
+            }else if(S.isString(value)){
+                this.get(0).innerHTML = value;
             }
         },
         /*
@@ -149,21 +162,27 @@
          * @param context DOMElement|String
          */
         query:function(selector,context){
-            var type,eles,selector;
+            var eles=[],type,selector;
             if(doc.querySelectorAll){
                 /*
                  * uncaught exception
                  * query = doc.querySelectorAll;
                  */
-                this.query = function(selector,context){
-                    if(typeof(selector)=='object') return [selector];
-                    return doc.querySelectorAll(selector);
+                var _query = function(selector,context){
+                    if(S.isString(selector)){
+                        var r = doc.querySelectorAll(selector);
+                        var eles = [],i = 0;
+                        while(r[i]) eles.push(r[i++]);
+                        return eles;
+                    }
+                    else if(S.isArray(selector)) return selector;
+                    else return [selector];
                 };
-                return doc.querySelectorAll(selector);
+                this.query = _query;
+                return _query(selector,context);
             }
             //暂时只针对实现了querySelectAll的浏览器，后续尝试实现选择器或引入sizzle
             type = selector.indexOf('#')==0 ? 'ID' (selector.indexOf('.')==0 ? 'CLASS' : 'TAG') : 'TAG';
-            eles = [];
             selector = selector.replace(/^[#\.]/,'');
             switch(type){
                 case 'ID':
@@ -178,18 +197,14 @@
             return eles;
         },
         /*
-         * @description 将from中的元素/属性追加到to(Object)中
+         * @description 将from(array)中的元素/属性追加到to(object/array)中
          */
         add:function(to,from,start){
-            if(!S.isObject(to) || (!S.isObject(from)&&!S.isArray(from))) return;
-            var i = (S.isNumber(start) && start<to.length) ? start : (to.length ? 0 : to.length),
+            if(!S.isArray(from) || (!S.isObject(to)&&!S.isArray(to))) return;
+            var i = (S.isNumber(start) && start<to.length) ? start : to.length,
                 j = 0;
-            if(S.isObject(from)){
-                while(from[j]) to[i++] = from[j++];
-            }else if(S.isArray(from)){
-                for(var l=from.length;j<l;j++){
-                    to[i++] = from[j];
-                }
+            for(var l=from.length;j<l;j++){
+                to[i++] = from[j];
             }
             return to;
         },
@@ -197,7 +212,7 @@
             if(eles && S.isFunction(fn)){
                 var i = 0;
                 while(eles[i]){
-                    //set current element as this,and the index as the first default param
+                    //set current element(SO) as this,and the index as the first default param
                     fn.call(S(eles[i]),i);
                     ++i;
                 }
@@ -235,9 +250,10 @@
         }
     };
     /*
-     * @description 核心的功能函数
+     * @description 对外开放静态方法，通过SL.lang.mix拷贝到S对象
+     *              如类型判断type
      */
-    SL.core = {
+    SL.lang = {
         /*
          * @note 会覆盖掉同名属性/方法
          * @note 与SL.fn.add方法有点重复，考虑优化
@@ -247,21 +263,13 @@
             for(var i in s){
                 r[i] = s[i];
             }
-        }
-    };
-    /*
-     * @description 对外开放静态方法，通过SL.core.mix拷贝到S对象
-     *              如类型判断type
-     */
-    SL.lang = {
-        mix:SL.core.mix,
+        },
         type:function(obj){
             /*
              * @note 注意判断先后顺序
              */
             if(obj === null) return 'null';
             if(obj === undefined) return 'undefined';
-            if(obj.constructor == 'SO') return 'SO';
             if(typeof obj == 'string') return 'string';
             if(typeof obj == 'boolean') return 'boolean';
             if(typeof obj == 'function') return 'function';
@@ -297,11 +305,8 @@
         },
         isNaN:function(obj){
             return SL.lang.type(obj) === 'NaN';
-        },
-        isSO:function(obj){
-            return SL.lang.type(obj) === 'SO';
         }
     };
-    SL.core.mix(S,SL.lang);
+    SL.lang.mix(S,SL.lang);
     window.S = window.SL = S;
 })();
