@@ -83,7 +83,14 @@
         attr:function(name,value){
             return this;
         },
+        /*
+         * @note data值存储在什么地方
+         *       如何索引每个对象的data
+         */
         data:function(name,value){
+            if(!S.isUndefined(value)){
+                SL.fn.cache[name] = value;
+            }
             return this;
         },
         css:function(name,value){
@@ -108,6 +115,20 @@
                 this.get(0).innerHTML = value;
             }
         },
+        empty:function(){
+            this.each(function(){
+                this.html('');
+            })
+        },
+        parent:function(selector){
+
+        },
+        sibings:function(selector){
+        },
+        next:function(selector){
+        },
+        prev:function(selector){
+        },
         /*
          * @description 显示元素
          * @note 如何为不同类型元素设置不同的display
@@ -128,7 +149,7 @@
             return this;
         },
         toggle:function(i){
-
+            return this;
         }
     };
     /*
@@ -260,14 +281,14 @@
              */
             if(obj === null) return 'null';
             if(obj === undefined) return 'undefined';
-            // typeof NaN Number
-            if(isNaN(obj)) return 'NaN';
-            if(typeof obj == 'number') return 'number';
             if(typeof obj == 'string') return 'string';
             if(typeof obj == 'boolean') return 'boolean';
             if(typeof obj == 'function') return 'function';
             if(obj.constructor == Array) return 'array';
             if(obj.constructor == Object) return 'object';
+            // typeof NaN Number
+            if(isNaN(obj)) return 'NaN';
+            if(typeof obj == 'number') return 'number';
         },
         isString:function(obj){
             return SL.lang.type(obj) === 'string';
@@ -295,6 +316,9 @@
         },
         isNaN:function(obj){
             return SL.lang.type(obj) === 'NaN';
+        },
+        now:function(){
+            return new Date().getTime();
         }
     };
     SL.lang.mix(S,SL.lang);
