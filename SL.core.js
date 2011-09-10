@@ -173,7 +173,7 @@
          * @param context DOMElement|String
          */
         query:function(selector,context){
-            var eles=[],type,selector;
+            var ele,eles=[],type,selector=S.trim(selector);
             if(doc.querySelectorAll){
                 /*
                  * uncaught exception
@@ -194,10 +194,10 @@
             }
             //暂时只针对实现了querySelectAll的浏览器，后续尝试实现选择器或引入sizzle
             type = selector.indexOf('#')==0 ? 'ID' (selector.indexOf('.')==0 ? 'CLASS' : 'TAG') : 'TAG';
-            selector = selector.replace(/^[#\.]/,'');
             switch(type){
                 case 'ID':
-                    return [doc.getElementById(selector)];
+                    ele = SL.fn.$(selector);
+                    return ele ? [ele] : [];
                 case 'CLASS':
                     //
                     return doc.getElementByClassName(selector);
@@ -206,6 +206,32 @@
                     return doc.getElementsByTagName(selector);
             }
             return eles;
+        },
+        $:function(id){
+            if(!S.isString(id)) return;
+            var id = S.trim(id);
+            if(id.indexOf('#')!=0||id.indexOf(/\s/)) return;
+            return doc.getElementById(id);
+        },
+        $$:function(cls,context){
+            //context:类数组
+            //未完待续
+            if(!S.isString(cls)) return;
+            var cls = S.trim(cls);
+            var context = S.isObject(context) && context.length ? context : doc;
+        },
+        $$$:function(tag,context){
+            //context:类数组
+            //未完待续
+            if(!S.isString(tag)) return;
+            var eles = [];
+            var tag = S.trim(tag);
+            var context = S.isObject(context) && context.length ? context : doc;
+            if(context === doc) return doc.getElementsByTagName(tag);
+            else{
+                var i = 0;
+                while(context[i])
+            }
         },
         /*
          * @description 将from(array)中的元素/属性追加到to(object/array)中
@@ -319,6 +345,12 @@
         },
         now:function(){
             return new Date().getTime();
+        },
+        trim:function(s){
+            return s.replace(/^\s+/g,'').replace(/\s$/,'');
+        },
+        merge:function(o,s){
+            if(SL.fn.type(o)!=SL.fn.type(s) || !SL.fn.isObject(o) || !SL.fn.isArray(o)) return;
         }
     };
     SL.lang.mix(S,SL.lang);
