@@ -38,11 +38,10 @@
             var __eles__ = SL.fn.query(selector,context);
             SL.fn.add(this.__eles__,__eles__);
             SL.fn.add(this,__eles__);
-            this.length = this.size();
             return this;
         },
         /*
-         * @note 默认将当前元素封装为SO作为第一个参数传递
+         * @note 默认将当前元素(封装为SO(出于性能考虑，舍弃此写法))作为第一个参数传递
          */
         each:function(fn){
             SL.fn.each(this.__eles__,fn);
@@ -50,33 +49,32 @@
         },
         on:function(evt,fn){
             this.each(function(i){
-                SL.fn.addEvent(this.get(0),evt,fn,i);
+                SL.fn.addEvent(this,evt,fn,i);
             });
             return this;
         },
         addClass:function(cls){
             this.each(function(){
-                SL.fn.addClass(this.get(0),cls);
+                SL.fn.addClass(this,cls);
             });
             return this;
         },
         removeClass:function(cls){
             this.each(function(){
-                SL.fn.replaceClass(this.get(0),cls,'');
+                SL.fn.replaceClass(this,cls,'');
             });
             return this;
         },
         replaceClass:function(oldCls,newCls){
             this.each(function(){
-                SL.fn.replaceClass(this.get(0),oldCls,newCls);
+                SL.fn.replaceClass(this,oldCls,newCls);
             });
             return this;
         },
         toggleClass:function(cls){
             this.each(function(){
-                var ele = this.get(0);
-                if(ele.className.indexOf(cls)>=0) SL.fn.replaceClass(ele,cls,'');
-                else SL.fn.addClass(ele,cls);
+                if(this.className.indexOf(cls)>=0) SL.fn.replaceClass(this,cls,'');
+                else SL.fn.addClass(this,cls);
             });
             return this;
         },
@@ -102,7 +100,7 @@
          */
         val:function(name,value){
             if(S.isUndefined(value)){
-                return this.get(0).value;
+                return this.value;
             }else{
 
                 return this;
@@ -110,14 +108,14 @@
         },
         html:function(value){
             if(S.isUndefined(value)){
-                return this.get(0).innerHTML;
+                return this.innerHTML;
             }else if(S.isString(value)){
-                this.get(0).innerHTML = value;
+                this.innerHTML = value;
             }
         },
         empty:function(){
             this.each(function(){
-                this.html('');
+                this.innerHTML = '';
             })
         },
         parent:function(selector){
@@ -130,12 +128,17 @@
         prev:function(selector){
         },
         /*
+         * @description 当前集合中除去selector后的元素，默认出去自身
+         */
+        other:function(index){
+        },
+        /*
          * @description 显示元素
          * @note 如何为不同类型元素设置不同的display
          */
         show:function(){
             this.each(function(){
-                this.get(0).style.display = 'block';
+                this.style.display = 'block';
             });
             return this;
         },
@@ -144,7 +147,7 @@
          */
         hide:function(){
             this.each(function(){
-                this.get(0).style.display = 'none';
+                this.style.display = 'none';
             });
             return this;
         },
@@ -173,7 +176,9 @@
          * @param context DOMElement|String
          */
         query:function(selector,context){
-            var ele,eles=[],type,selector=S.trim(selector);
+            var ele,eles=[],type,selector=S.isString(selector) ? S.trim(selector) : selector;
+            alert(typeof selector)
+            if(selector.nodeType) return [selector];
             if(doc.querySelectorAll){
                 /*
                  * uncaught exception
@@ -228,9 +233,11 @@
             var tag = S.trim(tag);
             var context = S.isObject(context) && context.length ? context : doc;
             if(context === doc) return doc.getElementsByTagName(tag);
-            else{
+            else if(context.length){
                 var i = 0;
-                while(context[i])
+                while(context[i]){
+                    i++;
+                }
             }
         },
         /*
@@ -249,9 +256,10 @@
             if(eles && S.isFunction(fn)){
                 var i = 0;
                 while(eles[i]){
-                    //set current element(SO) as this,and the index as the first default param
-                    fn.call(S(eles[i]),i);
-                    ++i;
+                    //set current element(DOMElement) as this,and the index as the first default param
+                    //SO对象不利于性能提升，舍弃
+                    fn.call(eles[i],i);
+                    i++;
                 }
             }
         },
