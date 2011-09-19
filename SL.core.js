@@ -373,6 +373,9 @@
         }
     };
     SL.extend = {
+        /*
+         *为毛uid,expando,cache在原型中定义会错？
+         */
         uid:0,
         expando:'SL'+new Date().getTime(),
         cache:{}
