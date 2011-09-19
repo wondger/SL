@@ -21,6 +21,7 @@
     SL.prototype = {
         /*
          * @description get DOMElement by index
+         * 内部获取皆用此方法
          */
         get:function(i){
             return this.__eles__[i];
@@ -86,8 +87,15 @@
          *       如何索引每个对象的data
          */
         data:function(name,value){
+            var ele = this.length ? this.get(0) : null;
+            if(!ele) return;
+            //每个元素具有一个唯一expando值
+            if(!ele[S.expando]) ele[S.expando] = ++S.uid;
+            if(S.isUndefined(S.cache[ele[S.expando]])) S.cache[ele[S.expando]] = {};
             if(!S.isUndefined(value)){
-                SL.fn.cache[name] = value;
+                S.cache[ele[S.expando]][name] = value;
+            }else{
+                return S.cache[ele[S.expando]][name];
             }
             return this;
         },
@@ -108,9 +116,9 @@
         },
         html:function(value){
             if(S.isUndefined(value)){
-                return this.innerHTML;
+                return this.get(0).innerHTML;
             }else if(S.isString(value)){
-                this.innerHTML = value;
+                this.get(0).innerHTML = value;
             }
         },
         empty:function(){
@@ -177,7 +185,6 @@
          */
         query:function(selector,context){
             var ele,eles=[],type,selector=S.isString(selector) ? S.trim(selector) : selector;
-            alert(typeof selector)
             if(selector.nodeType) return [selector];
             if(doc.querySelectorAll){
                 /*
@@ -313,6 +320,7 @@
             /*
              * @note 注意判断先后顺序
              */
+            if(obj && obj.nodeType) return 'node';
             if(obj === null) return 'null';
             if(obj === undefined) return 'undefined';
             if(typeof obj == 'string') return 'string';
@@ -323,6 +331,9 @@
             // typeof NaN Number
             if(isNaN(obj)) return 'NaN';
             if(typeof obj == 'number') return 'number';
+        },
+        isNode:function(obj){
+            return SL.lang.type(obj) === 'node';
         },
         isString:function(obj){
             return SL.lang.type(obj) === 'string';
@@ -361,6 +372,12 @@
             if(SL.fn.type(o)!=SL.fn.type(s) || !SL.fn.isObject(o) || !SL.fn.isArray(o)) return;
         }
     };
+    SL.extend = {
+        uid:0,
+        expando:'SL'+new Date().getTime(),
+        cache:{}
+    };
     SL.lang.mix(S,SL.lang);
+    SL.lang.mix(S,SL.extend);
     window.S = window.SL = S;
 })();

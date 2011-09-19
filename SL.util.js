@@ -5,7 +5,7 @@
  * @Object
  */
 SL.util = {
-    Cookie:{
+    cookie:{
         /*
          * @param name:唯一cookie名称，不区分大小写
          * @param value:cookie值
