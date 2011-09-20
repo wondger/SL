@@ -45,7 +45,7 @@
          * @note 默认将当前元素(封装为SO(出于性能考虑，舍弃此写法))作为第一个参数传递
          */
         each:function(fn){
-            SL.fn.each(this.__eles__,fn);
+            S.each(this.__eles__,fn);
             return this;
         },
         on:function(evt,fn){
@@ -127,7 +127,14 @@
             })
         },
         parent:function(selector){
-
+            var eles = [];
+            if(S.isUndefined(selector)){
+                this.each(function(){
+                    //使用merge合并数组，去重
+                    if(this.parentNode) eles = S.merge(eles,[this.parentNode]);
+                })
+            }
+            return S(eles);
         },
         sibings:function(selector){
         },
@@ -185,21 +192,25 @@
          */
         query:function(selector,context){
             var ele,eles=[],type,selector=S.isString(selector) ? S.trim(selector) : selector;
+            if(!selector) return [];
             if(selector.nodeType) return [selector];
             if(doc.querySelectorAll){
                 /*
                  * uncaught exception
                  * query = doc.querySelectorAll;
+                 * query方法copy一份_query
                  */
                 var _query = function(selector,context){
+                    if(!selector) return [];
+                    if(selector.nodeType) return [selector];
+                    if(S.isArray(selector)) return selector;
+                    if(S.isNode(selector)) return selector;
                     if(S.isString(selector)){
                         var r = doc.querySelectorAll(selector);
                         var eles = [],i = 0;
                         while(r[i]) eles.push(r[i++]);
                         return eles;
                     }
-                    else if(S.isArray(selector)) return selector;
-                    else return [selector];
                 };
                 this.query = _query;
                 return _query(selector,context);
@@ -258,17 +269,6 @@
                 to[i++] = from[j];
             }
             return to;
-        },
-        each:function(eles,fn){
-            if(eles && S.isFunction(fn)){
-                var i = 0;
-                while(eles[i]){
-                    //set current element(DOMElement) as this,and the index as the first default param
-                    //SO对象不利于性能提升，舍弃
-                    fn.call(eles[i],i);
-                    i++;
-                }
-            }
         },
         /*
          * @function
@@ -333,34 +333,41 @@
             if(typeof obj == 'number') return 'number';
         },
         isNode:function(obj){
-            return SL.lang.type(obj) === 'node';
+            return S.type(obj) === 'node';
         },
         isString:function(obj){
-            return SL.lang.type(obj) === 'string';
+            return S.type(obj) === 'string';
         },
         isBoolean:function(obj){
-            return SL.lang.type(obj) === 'boolean';
+            return S.type(obj) === 'boolean';
         },
         isFunction:function(obj){
-            return SL.lang.type(obj) === 'function';
+            return S.type(obj) === 'function';
         },
         isNumber:function(obj){
-            return SL.lang.type(obj) === 'number';
+            return S.type(obj) === 'number';
         },
         isArray:function(obj){
-            return SL.lang.type(obj) === 'array';
+            return S.type(obj) === 'array';
         },
         isObject:function(obj){
-            return SL.lang.type(obj) === 'object';
+            return S.type(obj) === 'object';
+        },
+        isEmptyObject:function(obj){
+            if(!S.isObject(obj)) return false;
+            for(var i in obj){
+                return false;
+            }
+            return true;
         },
         isNull:function(obj){
-            return SL.lang.type(obj) === 'null';
+            return S.type(obj) === 'null';
         },
         isUndefined:function(obj){
-            return SL.lang.type(obj) === 'undefined';
+            return S.type(obj) === 'undefined';
         },
         isNaN:function(obj){
-            return SL.lang.type(obj) === 'NaN';
+            return S.type(obj) === 'NaN';
         },
         now:function(){
             return new Date().getTime();
@@ -368,12 +375,89 @@
         trim:function(s){
             return s.replace(/^\s+/g,'').replace(/\s$/,'');
         },
-        merge:function(o,s){
-            if(SL.fn.type(o)!=SL.fn.type(s) || !SL.fn.isObject(o) || !SL.fn.isArray(o)) return;
+        /*
+         * o:Array|Object
+         */
+        each:function(o,fn){
+            if(!S.isArray(o) && !S.isObject(o) || !S.isFunction(fn)) return;
+            if(S.isArray(o)){
+                var i = 0;
+                while(o[i]){
+                    //i:index in array
+                    fn.call(o[i],i);
+                    i++;
+                }
+            }else{
+                for(var i in o){
+                    //i:key
+                    fn.call(o[i],i);
+                }
+            }
+        },
+        /*
+         * @description 深拷贝
+         * @return copy
+         */
+        deepCopy:function(o){
+            if(!S.isArray(o) || !S.isObject(o)) return o;
+            var t;
+            if(S.isArray(o)){
+                t = [],i = 0,l = o.length;
+                while(i<l){
+                    t.push(o[i++]);
+                }
+            }else if(S.isObject(o)){
+                t = {};
+                for(var i in o){
+                    t[i] = o[i];
+                }
+            }
+            return t;
+        },
+        /*
+         * @description 合并数组或对象
+         * @param o:origin
+         * @param s:source
+         * @param f:force
+         */
+        merge:function(o,s,f){
+            if(S.type(o)!=S.type(s) || !S.isObject(o) && !S.isArray(o)) return;
+            var t = S.deepCopy(o),isArray = S.isArray(o);
+            if(isArray && !o.length || S.isEmptyObject(o)) return S.deepCopy(s);
+            //if force overwrite
+            if(f){
+                //数组比较值
+                //对象比较key
+                S.each(s,function(i){
+                    var si = this;
+                    S.each(o,function(j){
+                        if(isArray){
+                            if(si===this) t[i] = this;
+                            else t.push(this);
+                        }else{
+                            if(i===j) t[i] = this;
+                            else t[j] = this;
+                        }
+                    })
+                })
+            }else{
+                S.each(s,function(i){
+                    var si = this;
+                    S.each(o,function(j){
+                        if(isArray){
+                            if(si!==this) t.push(this);
+                        }else{
+                            if(i!==j) t[j] = this;
+                        }
+                    })
+                })
+            }
+            return t;
         }
     };
     SL.extend = {
         /*
+         * 原型不是共用的?
          *为毛uid,expando,cache在原型中定义会错？
          */
         uid:0,
